@@ -56,7 +56,6 @@ func main() {
 		exp1 := parseInt(os.Args[1])
 		exp2 := parseInt(os.Args[2])
 		for i := exp1; i <= exp2; i++ {
-			fmt.Println("append " + string(i))
 			row := pow2(i)
 			rows = append(rows, row)
 		}
