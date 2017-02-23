@@ -1,5 +1,7 @@
 # 2
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/thomasheller/2)](https://goreportcard.com/report/github.com/thomasheller/2)
+
 Handy power of 2 table/calculator.
 
 ## Usage
