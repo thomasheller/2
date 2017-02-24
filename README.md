@@ -6,11 +6,15 @@ Handy power of 2 table/calculator.
 
 ## Usage
 
-`2` Prints 2^1 through 2^40
+`2` Prints 2^1 through 2^40 (default)
 
-`2 n` Prints 2^n
+`2 n` Prints 2^n (single value)
 
-`2 n m` Prints 2^n through 2^m
+`2 n,m` Prints 2^n and 2^m (multiple values)
+
+`2 n-m` Prints 2^n through 2^m (range)
+
+`2 n-m,x-y,z` Prints 2^n through 2^m, 2^x through 2^y and 2^z
 
 ## Example
 

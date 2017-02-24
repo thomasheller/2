@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/dustin/go-humanize"
 	"github.com/thomasheller/slicecmp"
@@ -15,6 +17,36 @@ var (
 	bytes  map[int]string
 	names  map[int]string
 )
+
+type chunk interface {
+	Begin() int
+	End() int
+}
+
+type scalar struct {
+	i int
+}
+
+func (s *scalar) Begin() int {
+	return s.i
+}
+
+func (s *scalar) End() int {
+	return s.i
+}
+
+type interval struct {
+	begin int
+	end   int
+}
+
+func (i *interval) Begin() int {
+	return i.begin
+}
+
+func (i *interval) End() int {
+	return i.end
+}
 
 func main() {
 	approx = map[int]string{
@@ -46,23 +78,41 @@ func main() {
 		8: "YB",
 	}
 
-	rows := make([][]string, 0)
+	chunks := make([]chunk, 0)
+
+	re := regexp.MustCompile("^([\\d]+)-([\\d]+)$")
 
 	if len(os.Args) == 2 {
-		exp := parseInt(os.Args[1])
-		row := pow2(exp)
-		rows = append(rows, row)
-	} else if len(os.Args) == 3 {
-		exp1 := parseInt(os.Args[1])
-		exp2 := parseInt(os.Args[2])
-		for i := exp1; i <= exp2; i++ {
-			row := pow2(i)
-			rows = append(rows, row)
+		for _, s := range strings.Split(os.Args[1], ",") {
+			exp, err := parseInt(s)
+			if err == nil {
+				chunks = append(chunks, &scalar{i: exp})
+				continue
+			}
+			if re.MatchString(s) {
+				m := re.FindStringSubmatch(s)
+				i1, _ := parseInt(m[1])
+				i2, _ := parseInt(m[2])
+				chunks = append(chunks, &interval{begin: i1, end: i2})
+				continue
+			}
+			panic("Can't parse " + s)
 		}
 	} else {
-		for i := 1; i <= 40; i++ {
-			row := pow2(i)
-			rows = append(rows, row)
+		chunks = append(chunks, &interval{begin: 1, end: 40})
+	}
+
+	rows := make([][]string, 0)
+
+	for _, chunk := range chunks {
+		if chunk.Begin() <= chunk.End() {
+			for i := chunk.Begin(); i <= chunk.End(); i++ {
+				rows = append(rows, pow2(i))
+			}
+		} else {
+			for i := chunk.Begin(); i >= chunk.End(); i-- {
+				rows = append(rows, pow2(i))
+			}
 		}
 	}
 
@@ -85,12 +135,12 @@ func byteSize(exponent int, value float64) string {
 	return fmt.Sprintf("%.0f %s", value/math.Pow(2, float64(exponent/10)*10), getName(exponent))
 }
 
-func parseInt(s string) int {
+func parseInt(s string) (int, error) {
 	exp, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		panic("Not a valid integer")
+		return 0, err
 	}
-	return int(exp)
+	return int(exp), nil
 }
 
 func humanizeIntFloat64(exponent int, value float64) (humanized string) {
