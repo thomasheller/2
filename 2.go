@@ -80,7 +80,7 @@ func main() {
 
 	chunks := make([]chunk, 0)
 
-	re := regexp.MustCompile("^([\\d]+)-([\\d]+)$")
+	re := regexp.MustCompile(`^([\d]+)-([\d]+)$`)
 
 	if len(os.Args) == 2 {
 		for _, s := range strings.Split(os.Args[1], ",") {
@@ -117,7 +117,9 @@ func main() {
 	}
 
 	rows = slicecmp.Transform(rows)
-	fmt.Println(slicecmp.Sprintf('=', 4, slicecmp.AlignRight, []string{"2^x", "Value", "Approx.", "Mnemonic", "Byte size"}, rows...))
+
+	headings := []string{"2^x", "Value", "Approx.", "Mnemonic", "Byte size"}
+	fmt.Println(slicecmp.Sprintf('=', 4, slicecmp.AlignRight, headings, rows...))
 }
 
 func pow2(exponent int) []string {
